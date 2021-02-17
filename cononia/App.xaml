@@ -1,0 +1,17 @@
+﻿<Application x:Class="cononia.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:cononia"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+
+
+        <Style x:Key="cononiaHeaderStyle">
+            <Setter Property="Label.HorizontalAlignment" Value="Center"></Setter>
+            <Setter Property="Label.FontFamily" Value="Malgun Gothic"></Setter>
+            <Setter Property="Label.FontWeight" Value="Bold"></Setter>
+            <Setter Property="Label.FontSize" Value="18"></Setter>
+        </Style>
+        
+    </Application.Resources>
+</Application>

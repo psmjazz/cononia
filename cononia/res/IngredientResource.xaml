@@ -1,0 +1,26 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    <!--xmlns:system="clr-namespace:System;assembly=mscorlib">-->
+    <!--현재 안쓴다-->
+    <!--<ResourceDictionary x:Key="AllergeName">
+        <system:String x:Key="Egg">난류</system:String>
+        <system:String x:Key="Milk">우유</system:String>
+        <system:String x:Key="BuckWheat">메밀</system:String>
+        <system:String x:Key="Peanut">땅콩</system:String>
+        <system:String x:Key="Soybean">콩</system:String>
+        <system:String x:Key="Wheat">밀</system:String>
+        <system:String x:Key="Mackerel">고등어</system:String>
+        <system:String x:Key="Crab">게</system:String>
+        <system:String x:Key="Shirimp">새우</system:String>
+        <system:String x:Key="Fork">돼지고기</system:String>
+        <system:String x:Key="Peach">복숭아</system:String>
+        <system:String x:Key="Tomato">토마토</system:String>
+        <system:String x:Key="Sulfite">아황산류</system:String>
+        <system:String x:Key="Wallnut">호두</system:String>
+        <system:String x:Key="Chicken">닭고기</system:String>
+        <system:String x:Key="Beef">소고기</system:String>
+        <system:String x:Key="Squid">오징어</system:String>
+        <system:String x:Key="Clam">조개류</system:String>
+    </ResourceDictionary>-->
+    
+</ResourceDictionary>

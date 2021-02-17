@@ -1,0 +1,101 @@
+﻿<Page x:Class="cononia.page.ItemsPage.IngredientEditPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:cononia.page.ItemsPage"
+      mc:Ignorable="d" 
+      d:DesignHeight="600" d:DesignWidth="800"
+      Title="IngredientEdit">
+
+    <Page.Resources>
+        
+    </Page.Resources>
+
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource cononiaHeaderStyle}" >
+            제목
+        </Label>
+        <StackPanel Grid.Row="1">
+            <StackPanel Orientation="Horizontal">
+                <Label Margin="5">재료명</Label>
+                <TextBox Width="150" Height="25" x:Name="Name"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Margin="5">재고량</Label>
+                <TextBox Width="150" Height="25" x:Name="Stock"/>
+                <ComboBox Width="50" Height="25" 
+                          SelectionChanged="Unit_SelectionChanged"
+                          SelectedIndex="0">
+                    <ComboBoxItem>kg</ComboBoxItem>
+                    <ComboBoxItem>g</ComboBoxItem>
+                    <ComboBoxItem>L</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Margin="5">가격(kg당)</Label>
+                <TextBox Width="150" Height="25" x:Name="Price"/>
+            </StackPanel>
+            <StackPanel>
+                <Label Margin="5">알러지 정보</Label>
+                <StackPanel Orientation="Horizontal" Margin="3">
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">난류</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">우유</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">메밀</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">땅콩</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">콩</CheckBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="3">
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">밀</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">고등어</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">게</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">새우</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">돼지고기</CheckBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="3">
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">복숭아</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">토마토</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">아황산류</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">호두</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">닭고기</CheckBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="3">
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">소고기</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">오징어</CheckBox>
+                    <CheckBox Checked="Allergy_CheckBox_Checked" 
+                              Unchecked="Allergy_CheckBox_Unchecked">조개류</CheckBox>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+        <Button Grid.Row="2" Click="Ok_Button_Click">확인</Button>
+
+    </Grid>
+</Page>
