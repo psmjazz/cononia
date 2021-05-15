@@ -11,9 +11,9 @@ namespace cononia.src.common
 {
     public class DataCache<TKey, TValue> where TKey: notnull
     {
-        Dictionary<TKey, TValue> _cache;
-        Queue<TKey> _cachedId;
-        int _maxItem;
+        private Dictionary<TKey, TValue> _cache;
+        private Queue<TKey> _cachedId;
+        private int _maxItem;
 
         public DataCache(int maximun)
         {

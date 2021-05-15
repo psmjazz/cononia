@@ -2,6 +2,7 @@
 using cononia.src.db;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Data;
 using System.Data.SQLite;
@@ -20,7 +21,7 @@ namespace cononia.src.model
         const string _phonePattern = @"[0-9]{2,3}[-)][0-9]{3,4}-[0-9]{4}";
         const string _onlyNumPattern = @"[0-9]+";
 
-        public long ID { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; }
 
         public string Phone
@@ -82,16 +83,6 @@ namespace cononia.src.model
             Phone = OrderPhone;
         }
 
-        public long GetId()
-        {
-            return ID;
-        }
-
-        public string GetName()
-        {
-            return Name;
-        }
-
         public override string ToString()
         {
             return "Name : " + Name + "  Phone : " + Phone;
@@ -99,12 +90,16 @@ namespace cononia.src.model
 
     }
 
-    class OrderInfoManager : ABaseManager<OrderInfoManager, OrderInfo>
+    
+
+    class OrderInfoManager : ABaseManager<OrderInfoManager, OrderInfo>, IListable<OrderInfo>
     {   
         private enum Columns
         {
             ID, Name, Phone
         }
+
+        private List<OrderInfo> _orderInfos;
 
         protected override void PrepareInsertCommand()
         {
@@ -128,22 +123,31 @@ namespace cononia.src.model
             SelectByNameCommand.Parameters.Add("@Name", DbType.String);
         }
 
+        private bool _bExcutedSelectAllCommand;
+        private SQLiteCommand SelectAllCommand { get; set; }
+        private void PrepareSelectAllCommand()
+        {
+            SelectAllCommand = new SQLiteCommand(_dbManager.Connection);
+            SelectAllCommand.CommandText = @"SELECT * FROM OrderInfo";
+        }
+
         public override void Initialize()
         {
-            MaxCacheSize = 50;
+            _bExcutedSelectAllCommand = false;
+            MaxCacheSize = 1000;
             base.Initialize();
+            PrepareSelectAllCommand();
         }
 
         private void MakeOrderInfo(SQLiteDataReader reader, out OrderInfo OrderInfo)
         {
             OrderInfo = new OrderInfo();
 
-            if (reader.Read())
-            {
-                OrderInfo.ID = reader.GetInt64((int)Columns.ID);
-                OrderInfo.Name = reader.GetString((int)Columns.Name);
-                OrderInfo.Phone = reader.GetString((int)Columns.Phone); 
-            }
+            
+            OrderInfo.Id = reader.GetInt64((int)Columns.ID);
+            OrderInfo.Name = reader.GetString((int)Columns.Name);
+            OrderInfo.Phone = reader.GetString((int)Columns.Phone); 
+            
         }
 
         public OrderInfo SelectOrderInfoById(long ID)
@@ -157,7 +161,11 @@ namespace cononia.src.model
                 _dbManager.Connection.Open();
                 SelectByIdCommand.Parameters["@ID"].Value = ID;
                 SQLiteDataReader reader =  SelectByIdCommand.ExecuteReader();
-                MakeOrderInfo(reader, out info);
+                if(reader.Read())
+                {
+                    MakeOrderInfo(reader, out info);
+                    CacheData(info.Id, info);
+                }
             }
             catch(Exception e)
             {
@@ -182,7 +190,11 @@ namespace cononia.src.model
                 _dbManager.Connection.Open();
                 SelectByIdCommand.Parameters["@Name"].Value = Name;
                 SQLiteDataReader reader = SelectByIdCommand.ExecuteReader();
-                MakeOrderInfo(reader, out info);
+                if(reader.Read())
+                {
+                    MakeOrderInfo(reader, out info);
+                    CacheData(info.Id, info);
+                }
             }
             catch (Exception e)
             {
@@ -194,6 +206,37 @@ namespace cononia.src.model
             }
 
             return info;
+        }
+
+        public void GetAll(out List<OrderInfo> orderInfoList)
+        {
+            if(!_bExcutedSelectAllCommand)
+            {
+                _bExcutedSelectAllCommand = true;
+                _orderInfos = new List<OrderInfo>();
+                try
+                {
+                    _dbManager.Connection.Open();
+                    SQLiteDataReader reader = SelectAllCommand.ExecuteReader();
+
+                    OrderInfo info;
+                    while(reader.Read())
+                    {
+                        MakeOrderInfo(reader, out info);
+                        _orderInfos.Add(info);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.StackTrace);
+                }
+                finally
+                {
+                    _dbManager.Connection.Close();
+                }
+            }
+
+            orderInfoList = _orderInfos;
         }
 
         public long InsertOrderInfo(OrderInfo info)

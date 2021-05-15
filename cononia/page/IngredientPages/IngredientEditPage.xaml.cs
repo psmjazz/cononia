@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace cononia.page.ItemsPage
+namespace cononia.page.IngredientPages
 {
     /// <summary>
     /// Interaction logic for IngredientEdit.xaml
@@ -58,8 +58,8 @@ namespace cononia.page.ItemsPage
             _allergyList.Clear();
 
             _ingredientManager = IngredientManager.Instance;
-            System.Diagnostics.Debug.WriteLine("_ingredientManager initialized? : " + _ingredientManager.IsInitialized());
-            if (!_ingredientManager.IsInitialized())
+            System.Diagnostics.Debug.WriteLine("_ingredientManager initialized? : " + _ingredientManager.Initialized);
+            if (!_ingredientManager.Initialized)
                 _ingredientManager.Initialize();
         }
 

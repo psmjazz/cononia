@@ -62,7 +62,7 @@ namespace cononia.src.db
             {
                 return;
             }
-            Initialized = true;
+            base.Initialize();
 
             // db 파일 체크
             _dbBasePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sqlite");
@@ -89,6 +89,8 @@ namespace cononia.src.db
                     //Debug.WriteLine("+++++++++++++++++++");
                 }
             }
+
+            
         }
 
         private void CreateTable(string tableName, string sql)

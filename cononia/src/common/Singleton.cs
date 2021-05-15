@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace cononia.src.common
 {
-    abstract class Singleton<T> where T: class, new()
+    class Singleton<T> where T: class, new()
     {
         private static T _instance;
         private bool _initialized = false;
@@ -25,13 +25,26 @@ namespace cononia.src.common
             }
         }
 
-        public abstract void Initialize();
-
-        public bool IsInitialized()
+        public virtual void Initialize()
         {
-            return _initialized;
+            _initialized = true;
         }
 
-        protected bool Initialized { get; set; }
+        //public bool IsInitialized()
+        //{
+        //    return _initialized;
+        //}
+
+        public bool Initialized
+        {
+            get
+            {
+                return _initialized;
+            }
+            protected set
+            {
+                _initialized = value;
+            }
+        }
     }
 }

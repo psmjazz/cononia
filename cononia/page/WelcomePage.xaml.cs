@@ -1,4 +1,5 @@
 ﻿using cononia.page.ItemsPage;
+using cononia.page.IngredientPages;
 using cononia.src.model;
 using System;
 using System.Collections.Generic;
@@ -28,19 +29,20 @@ namespace cononia.page
             InitializeComponent();
 
             OrderInfoManager OIManager = OrderInfoManager.Instance;
-            if (!OIManager.IsInitialized())
+            if (!OIManager.Initialized)
                 OIManager.Initialize();
             
-            OrderInfo oi = new OrderInfo("테스트", "010-9065-8986");
-            OrderInfo oi2 = new OrderInfo("테스트2", "01090658986");
+            OrderInfo oi = new OrderInfo("테스트", "010-1111-2222");
+            OrderInfo oi2 = new OrderInfo("테스트2", "01011123334");
             Debug.WriteLine(oi.ToString());
             Debug.WriteLine(oi2.ToString());
         }
 
         public void IngredientButtonClick(object sender, RoutedEventArgs args)
         {
-            IngredientEditPage ingredientEdit = new IngredientEditPage();
-            this.NavigationService.Navigate(ingredientEdit);
+            //IngredientEditPage ingredientEdit = new IngredientEditPage();
+            IngredientListPage ingredientListPage = new IngredientListPage();
+            this.NavigationService.Navigate(ingredientListPage);
         }
 
         public void FoodButtonClick(object sender, RoutedEventArgs args)

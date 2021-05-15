@@ -1,5 +1,7 @@
 ﻿using cononia.src.common;
 using cononia.src.db;
+using cononia.src.rx;
+using cononia.src.rx.messages;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,6 +12,8 @@ using System.Runtime.ConstrainedExecution;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Forms;
 
 namespace cononia.src.model
 {
@@ -47,7 +51,7 @@ namespace cononia.src.model
     //}
 
     
-    class Ingredient
+    class Ingredient :IBaseItem
     {
         public enum Allergy
         {
@@ -75,7 +79,7 @@ namespace cononia.src.model
         private OrderInfo _orderInfo = null;
         private List<Allergy> _allergyList = null;
 
-        public long ID { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; }
         public long OrderInfoID { get; set; }
         public AUnit Stock { get; set; }
@@ -141,22 +145,30 @@ namespace cononia.src.model
 
         public override string ToString()
         {
-            return "ID : " + ID + "  Name : " + Name + "  Stock" + Stock.ToString() + "  Price : " + Price;
+            return "Id : " + Id + "  Name : " + Name + "  Stock" + Stock.ToString() + "  Price : " + Price;
         }
 
     }
 
     class IngredientManager : Singleton<IngredientManager>
     {
-        private DataCache<long, Ingredient> _cache;
-        private DataCache<string, long> _nameCache;
-        const int _maxCacheSize = 100;
+        //private DataCache<long, Ingredient> _cache;
+        //private DataCache<string, long> _nameCache;
+        //const int _maxCacheSize = 100;
         private DBManager _dbManager = null;
+        private List<IBaseItem> _ingredients;
+
+        // rx 노드
+        private RxNode _ingredientManagerNode;
+        // rx 노드 이벤트
+        private IDisposable _rxEventDisposable;
+        private IDisposable _ingredientControllerEventDisposable;
 
         private SQLiteCommand _insertCommand;
         private SQLiteCommand _getLastInsertRowIDCommand;
         private SQLiteCommand _selectByIDCommand;
         private SQLiteCommand _selectByNameCommand;
+        private SQLiteCommand _selectAllCommand;
 
         private enum _colunms
         {
@@ -176,17 +188,61 @@ namespace cononia.src.model
             Initialized = true;
 
             _dbManager = DBManager.Instance;
-            System.Diagnostics.Debug.WriteLine("_dbManager init? " + _dbManager.IsInitialized());
-            if (!_dbManager.IsInitialized())
+            System.Diagnostics.Debug.WriteLine("_dbManager init? " + _dbManager.Initialized);
+            if (!_dbManager.Initialized)
                 _dbManager.Initialize();
 
+            // rx 노드 초기화
+            _ingredientManagerNode = RxCore.Instance.CreateNode(ERxNodeName.RxIngredientManager);
+
+            _ingredients = new List<IBaseItem>();
             //_cache = new Dictionary<long, Ingredient>();
-            _cache = new DataCache<long, Ingredient>(_maxCacheSize);
-            _nameCache = new DataCache<string, long>(_maxCacheSize);
+            //_cache = new DataCache<long, Ingredient>(_maxCacheSize);
+            //_nameCache = new DataCache<string, long>(_maxCacheSize);
+
             PrepareInsertCommand();
             PrepareGetLastInsertRowIDCommand();
             PrepareSelectByIDCommand();
             PrepareSelectByNameCommand();
+            PrepareSelectAllCommand();
+        }
+
+        public void RegisterEvent()
+        {
+            _rxEventDisposable = RxCore.Instance.RxEvent.Subscribe(OnRxEvent);
+            _ingredientControllerEventDisposable = RxCore.Instance.GetNode(ERxNodeName.RxIngredientController).Subscribe(OnIngredientControllerEvent);
+        }
+
+        public void UnregisterEvent()
+        {
+            _rxEventDisposable.Dispose();
+            _ingredientControllerEventDisposable.Dispose();
+        }
+
+        private void OnRxEvent(MessageBase message)
+        {
+
+        }
+
+        private void OnIngredientControllerEvent(MessageBase message)
+        {
+            RxCommandMessage rxCommand = (RxCommandMessage)message;
+
+            switch(rxCommand.Command)
+            {
+                case ECommand.CommandLoadIngredients:
+                    int count = SelectAll();
+                    Debug.WriteLine("all ingredients : " + count);
+                    RxItemListMessage itemListMessage = new RxItemListMessage();
+                    itemListMessage.ItemList = _ingredients;
+                    _ingredientManagerNode.Publish(itemListMessage);
+                    break;
+
+                case ECommand.CommandGetIngredients:
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void PrepareInsertCommand()
@@ -220,14 +276,21 @@ namespace cononia.src.model
             _selectByNameCommand.CommandText = @"SELECT * FROM Ingredient WHERE Name= @Name";
             _selectByNameCommand.Parameters.Add("@Name", DbType.String);
         }
+        private void PrepareSelectAllCommand()
+        {
+            _selectAllCommand = new SQLiteCommand(_dbManager.Connection);
+            _selectAllCommand.CommandText = @"SELECT * FROM Ingredient";
+        }
 
-        private void MakeIngredient(SQLiteDataReader reader, out Ingredient ingredient)
+        private bool MakeIngredient(SQLiteDataReader reader, out Ingredient ingredient)
         {
             ingredient = new Ingredient();
+            Debug.WriteLine("###########!!!");
             if (reader.Read())
             {
+                Debug.WriteLine("###########2222");
                 // ID, 이름
-                ingredient.ID = reader.GetInt64((int)_colunms.ID);
+                ingredient.Id = reader.GetInt64((int)_colunms.ID);
                 ingredient.Name = reader.GetString((int)_colunms.Name);
 
                 // 알러지 정보 갖고오기
@@ -263,43 +326,57 @@ namespace cononia.src.model
                 // 가격 정보 갖고 오기
                 if (reader[(int)_colunms.Price].GetType() != typeof(DBNull))
                 {
-                    ingredient.Price = reader.GetInt32((int)_colunms.Price);
+                    ingredient.Price = reader.GetFloat((int)_colunms.Price);
                 }
+
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
-        private void CacheData(long ID, Ingredient ingredient)
-        {
-            _cache.InsertData(ID, ingredient);
-            _nameCache.InsertData(ingredient.Name, ID);
-        }
-        private Ingredient RetrieveData(long ID)
-        {
-            return _cache.GetData(ID);
-        }
-        private Ingredient RetrieveData(string Name)
-        {
-            if (_nameCache.HasData(Name))
-                return _cache.GetData(_nameCache.GetData(Name));
-            else
-                return null;
-        }
+        //private void CacheData(long ID, Ingredient ingredient)
+        //{
+        //    _cache.InsertData(ID, ingredient);
+        //    _nameCache.InsertData(ingredient.Name, ID);
+        //}
+        //private Ingredient RetrieveData(long ID)
+        //{
+        //    return _cache.GetData(ID);
+        //}
+        //private Ingredient RetrieveData(string Name)
+        //{
+        //    if (_nameCache.HasData(Name))
+        //        return _cache.GetData(_nameCache.GetData(Name));
+        //    else
+        //        return null;
+        //}
 
-        public Ingredient SelectIngredientByID(long ID)
+        public Ingredient SelectIngredientByID(long ingredientId)
         {
-            Ingredient ingredient = RetrieveData(ID);//new Ingredient();
-            if (ingredient != null)
+
+            //Ingredient ingredient = RetrieveData(ID);//new Ingredient();
+            //if (ingredient != null)
+            //    return ingredient;
+
+            Ingredient ingredient = (Ingredient)_ingredients.Find(ingredient => ingredient.Id == ingredientId);
+            if(ingredient != default)
+            {
                 return ingredient;
-
+            }
+            
             try
             {
                 _dbManager.Connection.Open();
 
-                _selectByIDCommand.Parameters["@ID"].Value = ID;
+                _selectByIDCommand.Parameters["@ID"].Value = ingredientId;
                 SQLiteDataReader reader = _selectByIDCommand.ExecuteReader();
                 MakeIngredient(reader, out ingredient);
-
-                CacheData(ID, ingredient);
+                
+                _ingredients.Add(ingredient);
+                //CacheData(ID, ingredient);
             }
             catch (Exception e)
             {
@@ -310,24 +387,26 @@ namespace cononia.src.model
             {
                 _dbManager.Connection.Close();
             }
+
             return ingredient;
         }
 
-        public Ingredient SelectIngredientByName(string Name)
+        public Ingredient SelectIngredientByName(string ingredientName)
         {
-            Ingredient ingredient = RetrieveData(Name);//new Ingredient();
-            if (ingredient != null)
-                return ingredient;
+            Ingredient ingredient = (Ingredient)_ingredients.Find(ingredient => ingredient.Name == ingredientName); ;
+            //Ingredient ingredient = RetrieveData(Name);//new Ingredient();
+            //if (ingredient != null)
+            //    return ingredient;
 
             try
             {
                 _dbManager.Connection.Open();
 
-                _selectByNameCommand.Parameters["@Name"].Value = Name;
+                _selectByNameCommand.Parameters["@Name"].Value = ingredientName;
                 SQLiteDataReader reader = _selectByNameCommand.ExecuteReader();
                 MakeIngredient(reader, out ingredient);
 
-                CacheData(ingredient.ID, ingredient);
+                //CacheData(ingredient.Id, ingredient);
             }
             catch (Exception e)
             {
@@ -338,6 +417,8 @@ namespace cononia.src.model
             {
                 _dbManager.Connection.Close();
             }
+
+            _ingredients.Add(ingredient);
             return ingredient;
         }
 
@@ -352,7 +433,6 @@ namespace cononia.src.model
 
                 _dbManager.Connection.Open();
 
-                _insertCommand.Connection = _dbManager.Connection;
                 _insertCommand.Parameters["@name"].Value = ingredient.Name;
                 _insertCommand.Parameters["@stock"].Value = ingredient.Stock.Quantity;
                 _insertCommand.Parameters["@unitType"].Value = ingredient.Stock.GetType().Name;
@@ -376,9 +456,43 @@ namespace cononia.src.model
                 _dbManager.Connection.Close();
             }
 
-            ingredient.ID = last_insert_id;
-            CacheData(last_insert_id, ingredient);
+            ingredient.Id = last_insert_id;
+            //CacheData(last_insert_id, ingredient);
+            _ingredients.Add(ingredient);
             return last_insert_id;
         }
+
+        private int SelectAll()
+        {
+            _ingredients.Clear();
+
+            try
+            {
+                _dbManager.Connection.Open();
+
+                SQLiteDataReader reader = _selectAllCommand.ExecuteReader();
+
+                Ingredient ingredient;
+                Debug.WriteLine("AAAAAAAAAAAa");
+                while(MakeIngredient(reader, out ingredient))
+                {
+                    Debug.WriteLine("BBBBBBBBBBBB");
+                    _ingredients.Add(ingredient);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.StackTrace);
+                throw e;
+            }
+            finally
+            {
+                _dbManager.Connection.Close();
+            }
+
+            return _ingredients.Count();
+        }
+
     }
 }

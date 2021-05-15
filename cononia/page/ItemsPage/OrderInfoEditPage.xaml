@@ -8,9 +8,16 @@
       d:DesignHeight="600" d:DesignWidth="800"
       Title="OrderInfoEditPage">
 
+    <!--<Page.Resources>
+        <CollectionViewSource
+                Source="{Binding Source={x:Static Application.Current}, Path=OIList}"
+                x:Key="ListingDataView" />
+    </Page.Resources>-->
+
     <Grid Background="White">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
@@ -26,6 +33,15 @@
             </StackPanel>
             <Button Click="Ok_Button_Click">확인</Button>
         </StackPanel>
+
+        <ListView Name="TestList" Grid.Row="2">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Name" Width="200" DisplayMemberBinding="{Binding Name}" />
+                    <GridViewColumn Header="Phone" Width="200" DisplayMemberBinding="{Binding Phone}" />
+                </GridView>
+            </ListView.View>
+        </ListView>
     </Grid>
 
     

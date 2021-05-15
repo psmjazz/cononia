@@ -18,7 +18,7 @@ namespace cononia.src.model
         protected void CacheData(long ID, TItem Item)
         {
             _cache.InsertData(ID, Item);
-            _nameCache.InsertData(Item.GetName(), ID);
+            _nameCache.InsertData(Item.Name, ID);
         }
         protected TItem RetrieveData(long ID)
         {
@@ -31,7 +31,7 @@ namespace cononia.src.model
             else
                 return default(TItem);
         }
-        
+
         protected SQLiteCommand InsertCommand { get; set; }
         protected SQLiteCommand GetLastInsertRowIdCommand { get; set; }
         protected SQLiteCommand SelectByNameCommand { get; set; }
@@ -52,11 +52,10 @@ namespace cononia.src.model
         {
             if (Initialized)
                 return;
-            Initialized = true;
+            base.Initialize();
 
             _dbManager = DBManager.Instance;
-            if (!_dbManager.IsInitialized())
-                _dbManager.Initialize();
+            _dbManager.Initialize();
 
             _cache = new DataCache<long, TItem>(MaxCacheSize);
             _nameCache = new DataCache<string, long>(MaxCacheSize);
