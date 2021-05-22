@@ -16,7 +16,7 @@ namespace cononia.src.model
         
         public override string ToString()
         {
-            return Trans(Quantity, Units.None, Units.Killo).ToString() + "kg";
+            return string.Format("{0:0.00}kg", Trans(Quantity, Units.None, Units.Killo));
         }
         public string ToString(Units unit)
         {

@@ -4,6 +4,7 @@ using cononia.src.rx.messages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -33,6 +34,7 @@ namespace cononia.page.IngredientPages
 
         public IngredientListPage()
         {
+            Debug.WriteLine("ingredientList Page ctor");
             InitializeComponent();
 
             _ingredientListPageNode = RxCore.Instance.CreateNode(ERxNodeName.RxIngredientList);
@@ -41,6 +43,11 @@ namespace cononia.page.IngredientPages
             _commandMessage = new RxCommandMessage();
             _commandMessage.Command = ECommand.CommandLoadIngredients;
             _ingredientListPageNode.Publish(_commandMessage);
+        }
+
+        ~IngredientListPage()
+        {
+            Debug.WriteLine("ingredientList Page dtor");
         }
 
         public void RegisterEvent()
@@ -66,7 +73,7 @@ namespace cononia.page.IngredientPages
         {
             Debug.WriteLine("okkkk!");
             RxItemListMessage itemListMessage = (RxItemListMessage)message;
-
+            ItemList.ItemsSource = itemListMessage.ItemList.OfType<Ingredient>();
         }
     }
 }

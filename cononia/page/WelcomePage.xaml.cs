@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using cononia.src.ui;
 
 namespace cononia.page
 {
@@ -41,7 +42,8 @@ namespace cononia.page
         public void IngredientButtonClick(object sender, RoutedEventArgs args)
         {
             //IngredientEditPage ingredientEdit = new IngredientEditPage();
-            IngredientListPage ingredientListPage = new IngredientListPage();
+            IngredientListPage ingredientListPage = (IngredientListPage) PageLoader.Instance.GetPage<IngredientListPage>();
+            //IngredientListPage ingredientListPage = new IngredientListPage();
             this.NavigationService.Navigate(ingredientListPage);
         }
 
