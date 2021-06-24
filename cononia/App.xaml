@@ -4,14 +4,12 @@
              xmlns:local="clr-namespace:cononia"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-
-
-        <Style x:Key="cononiaHeaderStyle">
-            <Setter Property="Label.HorizontalAlignment" Value="Center"></Setter>
-            <Setter Property="Label.FontFamily" Value="Malgun Gothic"></Setter>
-            <Setter Property="Label.FontWeight" Value="Bold"></Setter>
-            <Setter Property="Label.FontSize" Value="18"></Setter>
-        </Style>
+        
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Theme/MenuButtonTheme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
         
     </Application.Resources>
 </Application>

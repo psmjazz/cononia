@@ -10,7 +10,6 @@ using System.Diagnostics;
 using cononia.src.model;
 using cononia.src.controller;
 using cononia.src.rx;
-using cononia.src.rx.messages;
 using cononia.src.ui;
 
 namespace cononia
@@ -26,11 +25,6 @@ namespace cononia
             
             IngredientManager.Instance.Initialize();
             IngredientController.Instance.Initialize();
-
-            IngredientController.Instance.RegisterEvent();
-            IngredientManager.Instance.RegisterEvent();
-
-
             // page loader
             PageLoader.Instance.Initialize();
         }

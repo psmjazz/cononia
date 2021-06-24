@@ -4,15 +4,9 @@ using System.Text;
 
 namespace cononia.src.rx
 {
-    enum ERxNodeName
+    public enum EUpdateEvent
     {
-
-        RxIngredientManager,
-        RxIngredientController,
-
-        // dynamic
-        RxIngredientList,
-
+        UpdateIngredientList
     }
 
     enum ERxEventType

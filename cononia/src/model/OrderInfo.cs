@@ -92,8 +92,14 @@ namespace cononia.src.model
 
     
 
-    class OrderInfoManager : ABaseManager<OrderInfoManager, OrderInfo>, IListable<OrderInfo>
-    {   
+    class OrderInfoManager : Singleton<OrderInfoManager>//ABaseManager<OrderInfoManager, OrderInfo>, IListable<OrderInfo>
+    {
+
+        private DBManager _dbManager = null;
+
+        private SQLiteCommand _insertCommand;
+        private SQLiteCommand _selectByIdCommand;
+        private SQLiteCommand _selectByNameCommand;
         private enum Columns
         {
             ID, Name, Phone
@@ -101,26 +107,26 @@ namespace cononia.src.model
 
         private List<OrderInfo> _orderInfos;
 
-        protected override void PrepareInsertCommand()
+        protected void PrepareInsertCommand()
         {
-            InsertCommand = new SQLiteCommand(_dbManager.Connection);
-            InsertCommand.CommandText
+            _insertCommand = new SQLiteCommand(_dbManager.Connection);
+            _insertCommand.CommandText
                 = @"INSERT INTO OrderInfo(Name, Phone) VALUES(@Name, @Phone)";
-            InsertCommand.Parameters.Add("@Name", DbType.String);
-            InsertCommand.Parameters.Add("@Phone", DbType.String);
+            _insertCommand.Parameters.Add("@Name", DbType.String);
+            _insertCommand.Parameters.Add("@Phone", DbType.String);
         }
-        protected override void PrepareSelectByIDCommand()
+        protected void PrepareSelectByIDCommand()
         {
-            SelectByIdCommand = new SQLiteCommand(_dbManager.Connection);
-            SelectByIdCommand.CommandText = @"SELECT * FROM OrderInfo WHERE ID= @ID";
-            SelectByIdCommand.Parameters.Add("@ID", DbType.Int64);
+            _selectByIdCommand = new SQLiteCommand(_dbManager.Connection);
+            _selectByIdCommand.CommandText = @"SELECT * FROM OrderInfo WHERE ID= @ID";
+            _selectByIdCommand.Parameters.Add("@ID", DbType.Int64);
         }
 
-        protected override void PrepareSelectByNameCommand()
+        protected void PrepareSelectByNameCommand()
         {
-            SelectByNameCommand = new SQLiteCommand(_dbManager.Connection);
-            SelectByNameCommand.CommandText = @"SELECT * FROM OrderInfo WHERE Name= @Name";
-            SelectByNameCommand.Parameters.Add("@Name", DbType.String);
+            _selectByNameCommand = new SQLiteCommand(_dbManager.Connection);
+            _selectByNameCommand.CommandText = @"SELECT * FROM OrderInfo WHERE Name= @Name";
+            _selectByNameCommand.Parameters.Add("@Name", DbType.String);
         }
 
         private bool _bExcutedSelectAllCommand;
@@ -134,7 +140,6 @@ namespace cononia.src.model
         public override void Initialize()
         {
             _bExcutedSelectAllCommand = false;
-            MaxCacheSize = 1000;
             base.Initialize();
             PrepareSelectAllCommand();
         }
@@ -150,67 +155,68 @@ namespace cononia.src.model
             
         }
 
-        public OrderInfo SelectOrderInfoById(long ID)
-        {
-            OrderInfo info = RetrieveData(ID);
-            if (info != null)
-                return info;
+        //    public OrderInfo SelectOrderInfoById(long ID)
+        //    {
+        //        OrderInfo info = RetrieveData(ID);
+        //        if (info != null)
+        //            return info;
 
-            try
-            {
-                _dbManager.Connection.Open();
-                SelectByIdCommand.Parameters["@ID"].Value = ID;
-                SQLiteDataReader reader =  SelectByIdCommand.ExecuteReader();
-                if(reader.Read())
-                {
-                    MakeOrderInfo(reader, out info);
-                    CacheData(info.Id, info);
-                }
-            }
-            catch(Exception e)
-            {
-                Debug.WriteLine(e.StackTrace);
-            }
-            finally
-            {
-                _dbManager.Connection.Close();
-            }
+        //        try
+        //        {
+        //            _dbManager.Connection.Open();
+        //            SelectByIdCommand.Parameters["@ID"].Value = ID;
+        //            SQLiteDataReader reader =  SelectByIdCommand.ExecuteReader();
+        //            if(reader.Read())
+        //            {
+        //                MakeOrderInfo(reader, out info);
+        //                CacheData(info.Id, info);
+        //            }
+        //        }
+        //        catch(Exception e)
+        //        {
+        //            Debug.WriteLine(e.StackTrace);
+        //        }
+        //        finally
+        //        {
+        //            _dbManager.Connection.Close();
+        //        }
 
-            return info;
-        }
-        
+        //        return info;
+        //    }
+
         public OrderInfo SelectOrderInfoByName(string Name)
         {
-            OrderInfo info = RetrieveData(Name);
-            if (info != null)
-                return info;
+            OrderInfo info = new OrderInfo();
+            //OrderInfo info = RetrieveData(Name);
+            //if (info != null)
+            //    return info;
 
-            try
-            {
-                _dbManager.Connection.Open();
-                SelectByIdCommand.Parameters["@Name"].Value = Name;
-                SQLiteDataReader reader = SelectByIdCommand.ExecuteReader();
-                if(reader.Read())
-                {
-                    MakeOrderInfo(reader, out info);
-                    CacheData(info.Id, info);
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.StackTrace);
-            }
-            finally
-            {
-                _dbManager.Connection.Close();
-            }
+            //try
+            //{
+            //    _dbManager.Connection.Open();
+            //    SelectByIdCommand.Parameters["@Name"].Value = Name;
+            //    SQLiteDataReader reader = SelectByIdCommand.ExecuteReader();
+            //    if (reader.Read())
+            //    {
+            //        MakeOrderInfo(reader, out info);
+            //        CacheData(info.Id, info);
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    Debug.WriteLine(e.StackTrace);
+            //}
+            //finally
+            //{
+            //    _dbManager.Connection.Close();
+            //}
 
             return info;
         }
 
         public void GetAll(out List<OrderInfo> orderInfoList)
         {
-            if(!_bExcutedSelectAllCommand)
+            if (!_bExcutedSelectAllCommand)
             {
                 _bExcutedSelectAllCommand = true;
                 _orderInfos = new List<OrderInfo>();
@@ -220,7 +226,7 @@ namespace cononia.src.model
                     SQLiteDataReader reader = SelectAllCommand.ExecuteReader();
 
                     OrderInfo info;
-                    while(reader.Read())
+                    while (reader.Read())
                     {
                         MakeOrderInfo(reader, out info);
                         _orderInfos.Add(info);
@@ -247,14 +253,14 @@ namespace cononia.src.model
             {
                 _dbManager.Connection.Open();
 
-                InsertCommand.Parameters["@Name"].Value = info.Name;
-                InsertCommand.Parameters["@Phone"].Value = info.Phone;
-                InsertCommand.ExecuteNonQuery();
+                _insertCommand.Parameters["@Name"].Value = info.Name;
+                _insertCommand.Parameters["@Phone"].Value = info.Phone;
+                _insertCommand.ExecuteNonQuery();
 
-                lastInsertId = (long)GetLastInsertRowIdCommand.ExecuteScalar();
+                //lastInsertId = (long)GetLastInsertRowIdCommand.ExecuteScalar();
                 Debug.WriteLine("id : " + lastInsertId);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.WriteLine(e.StackTrace);
             }

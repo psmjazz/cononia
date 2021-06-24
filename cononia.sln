@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cononia", "cononia\cononia.csproj", "{E72F88F7-2475-4062-BDE3-28BD07209D1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cononia", "cononia\cononia.csproj", "{E72F88F7-2475-4062-BDE3-28BD07209D1D}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "Installer\Installer.vdproj", "{659C8AF8-6591-4EB6-815C-F8573AD09749}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,8 @@ Global
 		{E72F88F7-2475-4062-BDE3-28BD07209D1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E72F88F7-2475-4062-BDE3-28BD07209D1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E72F88F7-2475-4062-BDE3-28BD07209D1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{659C8AF8-6591-4EB6-815C-F8573AD09749}.Debug|Any CPU.ActiveCfg = Debug
+		{659C8AF8-6591-4EB6-815C-F8573AD09749}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

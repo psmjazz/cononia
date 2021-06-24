@@ -21,7 +21,7 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <Label Grid.Row="0" Style="{StaticResource cononiaHeaderStyle}">제목제목</Label>
+        <Label Grid.Row="0" >제목제목</Label>
         <StackPanel Grid.Row="1">
             <StackPanel Orientation="Horizontal">
                 <Label Margin="5">거래처명</Label>

@@ -1,5 +1,6 @@
 ﻿using cononia.src.common;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.Diagnostics;
@@ -10,37 +11,9 @@ namespace cononia.src.db
     {
         //private static DBManager _instance;
         private string _dbBasePath;
-        private string _dbName = "cononia.db";
         private SQLiteConnection _connection = null;
         
         private bool _needSchemaUpdate = false;
-        private string[,] _createSQLs = new string[,]
-        {
-            {
-                "OrderInfo",
-                @"CREATE TABLE OrderInfo(ID INTEGER PRIMARY KEY, Name TEXT NOT NULL, Phone TEXT)"
-            },
-            {
-                "Ingredient",
-                @"CREATE TABLE Ingredient(
-                    ID INTEGER PRIMARY KEY, 
-                    Name TEXT NOT NULL, 
-                    Stock REAL NOT NULL, 
-                    UnitType TEXT NOT NULL,
-                    Price REAL,
-                    Allergies INTEGER,
-                    OrderInfoID INTEGER REFERENCES OrderInfo(ID) ON UPDATE CASCADE ON DELETE SET NULL)"
-            },
-            {
-                "PriceTrace",
-                @"CREATE TABLE PriceTrace(
-                    ID INTEGER REFERENCES Ingredient(ID) ON UPDATE CASCADE ON DELETE CASCADE, 
-                    Date DATE, 
-                    Price INTEGER, 
-                    PRIMARY KEY(ID, Date))"
-            }
-
-        };
 
         public SQLiteConnection Connection
         {
@@ -48,7 +21,8 @@ namespace cononia.src.db
             {
                 if(_connection == null)
                 {
-                    string dbPath = System.IO.Path.Combine(_dbBasePath, _dbName);
+
+                    string dbPath = System.IO.Path.Combine(_dbBasePath, DBInfo.DBName);
                     string dataSource = String.Format(@"Data Source={0}", dbPath);
                     _connection = new SQLiteConnection(dataSource);
                 }
@@ -64,29 +38,33 @@ namespace cononia.src.db
             }
             base.Initialize();
 
-            // db 파일 체크
+            // db 위치 폴더 체크
             _dbBasePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sqlite");
             if (!System.IO.Directory.Exists(_dbBasePath))
             {
                 Debug.WriteLine("make db dir");
                 System.IO.Directory.CreateDirectory(_dbBasePath);
             }
-            string dbPath = System.IO.Path.Combine(_dbBasePath, _dbName);
+
+            // db 위치 파일 체크
+            string dbPath = System.IO.Path.Combine(_dbBasePath, DBInfo.DBName);
+            string[] tables;
+            DBInfo.GetTableName(out tables);
             if (!System.IO.File.Exists(dbPath))
             {
-                SQLiteConnection.CreateFile(dbPath);
+                foreach(var table in tables )
+                {
+                    CreateTable(table, DBInfo.GetSchema(table));
+                }
             }
 
-            // db 스키마 초기화 및 업데이트
+            // db 스키마 초기화
             if (_needSchemaUpdate)
             {
-                for (int i = 0; i < _createSQLs.Length / 2; i++)
+                foreach (var table in tables)
                 {
-                    DropTable(_createSQLs[i, 0]);
-                    CreateTable(_createSQLs[i, 0], _createSQLs[i, 1]);
-                    //Debug.WriteLine(_createSQLs[i, 0]);
-                    //Debug.WriteLine(_createSQLs[i, 1]);
-                    //Debug.WriteLine("+++++++++++++++++++");
+                    DropTable(table);
+                    CreateTable(table, DBInfo.GetSchema(table));
                 }
             }
 

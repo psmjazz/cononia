@@ -9,62 +9,62 @@ using System.Text;
 
 namespace cononia.src.model
 {
-    abstract class ABaseManager<TManager, TItem>: Singleton<TManager> where TManager:class, new() where TItem: IBaseItem
-    {
-        private DataCache<long, TItem> _cache;
-        private DataCache<string, long> _nameCache;
-        protected DBManager _dbManager;
+    //abstract class ABaseManager<TManager, TItem>: Singleton<TManager> where TManager:class, new() where TItem: IBaseItem
+    //{
+    //    private DataCache<long, TItem> _cache;
+    //    private DataCache<string, long> _nameCache;
+    //    protected DBManager _dbManager;
 
-        protected void CacheData(long ID, TItem Item)
-        {
-            _cache.InsertData(ID, Item);
-            _nameCache.InsertData(Item.Name, ID);
-        }
-        protected TItem RetrieveData(long ID)
-        {
-            return _cache.GetData(ID);
-        }
-        protected TItem RetrieveData(string Name)
-        {
-            if (_nameCache.HasData(Name))
-                return _cache.GetData(_nameCache.GetData(Name));
-            else
-                return default(TItem);
-        }
+    //    protected void CacheData(long ID, TItem Item)
+    //    {
+    //        _cache.InsertData(ID, Item);
+    //        _nameCache.InsertData(Item.Name, ID);
+    //    }
+    //    protected TItem RetrieveData(long ID)
+    //    {
+    //        return _cache.GetData(ID);
+    //    }
+    //    protected TItem RetrieveData(string Name)
+    //    {
+    //        if (_nameCache.HasData(Name))
+    //            return _cache.GetData(_nameCache.GetData(Name));
+    //        else
+    //            return default(TItem);
+    //    }
 
-        protected SQLiteCommand InsertCommand { get; set; }
-        protected SQLiteCommand GetLastInsertRowIdCommand { get; set; }
-        protected SQLiteCommand SelectByNameCommand { get; set; }
-        protected SQLiteCommand SelectByIdCommand { get; set; }
+    //    protected SQLiteCommand InsertCommand { get; set; }
+    //    protected SQLiteCommand GetLastInsertRowIdCommand { get; set; }
+    //    protected SQLiteCommand SelectByNameCommand { get; set; }
+    //    protected SQLiteCommand SelectByIdCommand { get; set; }
 
-        public int MaxCacheSize { get; set; }
+    //    public int MaxCacheSize { get; set; }
 
-        protected void PrepareGetLastInsertRowIDCommand()
-        {
-            GetLastInsertRowIdCommand = new SQLiteCommand(_dbManager.Connection);
-            GetLastInsertRowIdCommand.CommandText = @"SELECT last_insert_rowid()";
-        }
-        protected abstract void PrepareInsertCommand();
-        protected abstract void PrepareSelectByIDCommand();
-        protected abstract void PrepareSelectByNameCommand();
+    //    protected void PrepareGetLastInsertRowIDCommand()
+    //    {
+    //        GetLastInsertRowIdCommand = new SQLiteCommand(_dbManager.Connection);
+    //        GetLastInsertRowIdCommand.CommandText = @"SELECT last_insert_rowid()";
+    //    }
+    //    protected abstract void PrepareInsertCommand();
+    //    protected abstract void PrepareSelectByIDCommand();
+    //    protected abstract void PrepareSelectByNameCommand();
 
-        public override void Initialize()
-        {
-            if (Initialized)
-                return;
-            base.Initialize();
+    //    public override void Initialize()
+    //    {
+    //        if (Initialized)
+    //            return;
+    //        base.Initialize();
 
-            _dbManager = DBManager.Instance;
-            _dbManager.Initialize();
+    //        _dbManager = DBManager.Instance;
+    //        _dbManager.Initialize();
 
-            _cache = new DataCache<long, TItem>(MaxCacheSize);
-            _nameCache = new DataCache<string, long>(MaxCacheSize);
+    //        _cache = new DataCache<long, TItem>(MaxCacheSize);
+    //        _nameCache = new DataCache<string, long>(MaxCacheSize);
 
-            PrepareGetLastInsertRowIDCommand();
-            PrepareInsertCommand();
-            PrepareSelectByIDCommand();
-            PrepareSelectByNameCommand();
-        }
+    //        PrepareGetLastInsertRowIDCommand();
+    //        PrepareInsertCommand();
+    //        PrepareSelectByIDCommand();
+    //        PrepareSelectByNameCommand();
+    //    }
 
-    }
+    //}
 }

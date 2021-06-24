@@ -1,6 +1,7 @@
 ﻿using cononia.src.model;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -61,6 +62,8 @@ namespace cononia.page.IngredientPages
             System.Diagnostics.Debug.WriteLine("_ingredientManager initialized? : " + _ingredientManager.Initialized);
             if (!_ingredientManager.Initialized)
                 _ingredientManager.Initialize();
+
+            OrderInfoName.ItemsSource = new List<string>() { "코스트코", "청과", "홈플러스" };
         }
 
         private void Ok_Button_Click(object sender, RoutedEventArgs e)
@@ -135,5 +138,12 @@ namespace cononia.page.IngredientPages
                 _allergyList.Remove(allergyType);
             }
         }
+
+
+        
+        private void OrderInfoName_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Debug.WriteLine("123");
+        }        
     }
 }

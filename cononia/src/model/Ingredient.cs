@@ -1,7 +1,7 @@
 ﻿using cononia.src.common;
+using cononia.src.controller;
 using cononia.src.db;
 using cononia.src.rx;
-using cononia.src.rx.messages;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -150,6 +150,11 @@ namespace cononia.src.model
 
     }
 
+    public enum RxIngredientCommand
+    {
+        GetAllIngredients,
+    }
+
     class IngredientManager : Singleton<IngredientManager>
     {
         //private DataCache<long, Ingredient> _cache;
@@ -157,12 +162,6 @@ namespace cononia.src.model
         //const int _maxCacheSize = 100;
         private DBManager _dbManager = null;
         private List<IBaseItem> _ingredients;
-
-        // rx 노드
-        private RxNode _ingredientManagerNode;
-        // rx 노드 이벤트
-        private IDisposable _rxEventDisposable;
-        private IDisposable _ingredientControllerEventDisposable;
 
         private SQLiteCommand _insertCommand;
         private SQLiteCommand _getLastInsertRowIDCommand;
@@ -183,6 +182,7 @@ namespace cononia.src.model
 
         public override void Initialize()
         {
+            Debug.WriteLine("Ingredient init");
             if (Initialized)
                 return;
             Initialized = true;
@@ -191,9 +191,6 @@ namespace cononia.src.model
             System.Diagnostics.Debug.WriteLine("_dbManager init? " + _dbManager.Initialized);
             if (!_dbManager.Initialized)
                 _dbManager.Initialize();
-
-            // rx 노드 초기화
-            _ingredientManagerNode = RxCore.Instance.CreateNode(ERxNodeName.RxIngredientManager);
 
             _ingredients = new List<IBaseItem>();
             //_cache = new Dictionary<long, Ingredient>();
@@ -205,44 +202,26 @@ namespace cononia.src.model
             PrepareSelectByIDCommand();
             PrepareSelectByNameCommand();
             PrepareSelectAllCommand();
+
+            RxCore.Instance.RegisterListener(RxIngredientCommand.GetAllIngredients, OnGetAllIngredients);
         }
 
-        public void RegisterEvent()
-        {
-            _rxEventDisposable = RxCore.Instance.RxEvent.Subscribe(OnRxEvent);
-            _ingredientControllerEventDisposable = RxCore.Instance.GetNode(ERxNodeName.RxIngredientController).Subscribe(OnIngredientControllerEvent);
-        }
-
-        public void UnregisterEvent()
-        {
-            _rxEventDisposable.Dispose();
-            _ingredientControllerEventDisposable.Dispose();
-        }
-
-        private void OnRxEvent(MessageBase message)
+        private void OnRxEvent(RxMessage message)
         {
 
         }
 
-        private void OnIngredientControllerEvent(MessageBase message)
+        private void OnGetAllIngredients(RxMessage message)
         {
-            RxCommandMessage rxCommand = (RxCommandMessage)message;
+            int count = SelectAll();
+            Debug.WriteLine("all ingredients : " + count);
+            RxMessage itemListMessage = new RxMessage();
+            itemListMessage.Content = _ingredients;
+            RxCore.Instance.Publish(EUpdateEvent.UpdateIngredientList, itemListMessage);
+            //RxItemListMessage itemListMessage = new RxItemListMessage();
+            //itemListMessage.ItemList = _ingredients;
 
-            switch(rxCommand.Command)
-            {
-                case ECommand.CommandLoadIngredients:
-                    int count = SelectAll();
-                    Debug.WriteLine("all ingredients : " + count);
-                    RxItemListMessage itemListMessage = new RxItemListMessage();
-                    itemListMessage.ItemList = _ingredients;
-                    _ingredientManagerNode.Publish(itemListMessage);
-                    break;
-
-                case ECommand.CommandGetIngredients:
-                    break;
-                default:
-                    break;
-            }
+            //_ingredientManagerNode.Publish(itemListMessage);
         }
 
         private void PrepareInsertCommand()
@@ -479,6 +458,7 @@ namespace cononia.src.model
                     Debug.WriteLine("BBBBBBBBBBBB");
                     _ingredients.Add(ingredient);
                 }
+                reader.Close();
 
             }
             catch (Exception e)

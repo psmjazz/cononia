@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace cononia.src.common
 {
-    class Singleton<T> where T: class, new()
+    class Singleton<T> where T:  Singleton<T>, new()
     {
         private static T _instance;
         private bool _initialized = false;
@@ -20,14 +21,16 @@ namespace cononia.src.common
                 {
                     _instance = new T();
                 }
-
+                _instance.Initialize();
                 return _instance;
             }
         }
 
         public virtual void Initialize()
         {
+            Debug.WriteLine("singletone init");
             _initialized = true;
+            
         }
 
         //public bool IsInitialized()

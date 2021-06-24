@@ -1,6 +1,5 @@
 ﻿using cononia.src.model;
 using cononia.src.rx;
-using cononia.src.rx.messages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,7 +9,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -24,25 +22,17 @@ namespace cononia.page.IngredientPages
     /// </summary>
     public partial class IngredientListPage : Page
     {
-        private RxNode _ingredientListPageNode;
-        private IDisposable _rxEventDisposable;
-        private IDisposable _ingredientManagerEventDisposable;
 
         List<Ingredient> _ingredientList;
-
-        RxCommandMessage _commandMessage;
 
         public IngredientListPage()
         {
             Debug.WriteLine("ingredientList Page ctor");
             InitializeComponent();
 
-            _ingredientListPageNode = RxCore.Instance.CreateNode(ERxNodeName.RxIngredientList);
-            RegisterEvent();
+            RxCore.Instance.RegisterListener(EUpdateEvent.UpdateIngredientList, OnIngredientInfoUpdated);
 
-            _commandMessage = new RxCommandMessage();
-            _commandMessage.Command = ECommand.CommandLoadIngredients;
-            _ingredientListPageNode.Publish(_commandMessage);
+            RxCore.Instance.Publish(RxIngredientCommand.GetAllIngredients, new RxMessage());
         }
 
         ~IngredientListPage()
@@ -50,30 +40,29 @@ namespace cononia.page.IngredientPages
             Debug.WriteLine("ingredientList Page dtor");
         }
 
-        public void RegisterEvent()
-        {
-            _rxEventDisposable = RxCore.Instance.RxEvent.Subscribe(OnRxEvent);
-            _ingredientManagerEventDisposable = RxCore.Instance.GetNode(ERxNodeName.RxIngredientManager).Subscribe(OnIngredeientManagerEvent);
-        }
-
-        public void UnregisterEvent()
-        {
-            _rxEventDisposable.Dispose();
-            _ingredientManagerEventDisposable.Dispose();
-
-            RxCore.Instance.DeleteNode(ERxNodeName.RxIngredientList);
-        }
-
-        public void OnRxEvent(MessageBase message)
+        public void OnRxEvent(RxMessage message)
         {
 
         }
 
-        public void OnIngredeientManagerEvent(MessageBase message)
+        public void OnIngredientInfoUpdated(RxMessage message)
         {
             Debug.WriteLine("okkkk!");
-            RxItemListMessage itemListMessage = (RxItemListMessage)message;
-            ItemList.ItemsSource = itemListMessage.ItemList.OfType<Ingredient>();
+            ItemList.ItemsSource = ((List<IBaseItem>) message.Content).OfType<Ingredient>();
+
         }
+
+        private void ListViewItem_MouseDoubleClick(object sender, EventArgs e)
+        {
+            ListView listView = (ListView)sender;
+            Ingredient x = (Ingredient)listView.SelectedItem;
+        } 
+
+
+        private void ItemList_Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            RxCore.Instance.Publish(RxIngredientCommand.GetAllIngredients, new RxMessage());
+        }
+
     }
 }
