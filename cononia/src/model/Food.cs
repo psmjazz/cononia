@@ -23,7 +23,7 @@ namespace cononia.src.model
             }
         }
 
-        public Food() { };
+        public Food() { }
         public Food(string name, Dictionary<long, AUnit> ingredients = null)
         {
             this.Name = name;
