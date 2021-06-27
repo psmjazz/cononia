@@ -129,18 +129,13 @@ namespace cononia.src.model
             }
         }
 
+
         public Ingredient() { }
 
         public Ingredient(string name, AUnit stock)
         {
             Name = name;
             Stock = stock;
-        }
-        public Ingredient(string name, AUnit stock, long orderInfoID, List<Allergy> allergies = null)
-            :this(name, stock)
-        {
-            OrderInfoID = orderInfoID;
-            AllergyList = allergies;
         }
 
         public override string ToString()
@@ -183,9 +178,7 @@ namespace cononia.src.model
         public override void Initialize()
         {
             Debug.WriteLine("Ingredient init");
-            if (Initialized)
-                return;
-            Initialized = true;
+            base.Initialize();
 
             _dbManager = DBManager.Instance;
             System.Diagnostics.Debug.WriteLine("_dbManager init? " + _dbManager.Initialized);

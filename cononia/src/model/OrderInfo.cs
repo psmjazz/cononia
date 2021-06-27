@@ -100,6 +100,7 @@ namespace cononia.src.model
         private SQLiteCommand _insertCommand;
         private SQLiteCommand _selectByIdCommand;
         private SQLiteCommand _selectByNameCommand;
+        private SQLiteCommand _selectAllCommand;
         private enum Columns
         {
             ID, Name, Phone
@@ -107,7 +108,7 @@ namespace cononia.src.model
 
         private List<OrderInfo> _orderInfos;
 
-        protected void PrepareInsertCommand()
+        private void PrepareInsertCommand()
         {
             _insertCommand = new SQLiteCommand(_dbManager.Connection);
             _insertCommand.CommandText
@@ -115,32 +116,32 @@ namespace cononia.src.model
             _insertCommand.Parameters.Add("@Name", DbType.String);
             _insertCommand.Parameters.Add("@Phone", DbType.String);
         }
-        protected void PrepareSelectByIDCommand()
+        private void PrepareSelectByIDCommand()
         {
             _selectByIdCommand = new SQLiteCommand(_dbManager.Connection);
             _selectByIdCommand.CommandText = @"SELECT * FROM OrderInfo WHERE ID= @ID";
             _selectByIdCommand.Parameters.Add("@ID", DbType.Int64);
         }
 
-        protected void PrepareSelectByNameCommand()
+        private void PrepareSelectByNameCommand()
         {
             _selectByNameCommand = new SQLiteCommand(_dbManager.Connection);
             _selectByNameCommand.CommandText = @"SELECT * FROM OrderInfo WHERE Name= @Name";
             _selectByNameCommand.Parameters.Add("@Name", DbType.String);
         }
 
-        private bool _bExcutedSelectAllCommand;
-        private SQLiteCommand SelectAllCommand { get; set; }
         private void PrepareSelectAllCommand()
         {
-            SelectAllCommand = new SQLiteCommand(_dbManager.Connection);
-            SelectAllCommand.CommandText = @"SELECT * FROM OrderInfo";
+            _selectAllCommand = new SQLiteCommand(_dbManager.Connection);
+            _selectAllCommand.CommandText = @"SELECT * FROM OrderInfo";
         }
 
         public override void Initialize()
         {
-            _bExcutedSelectAllCommand = false;
             base.Initialize();
+            PrepareInsertCommand();
+            PrepareSelectByIDCommand();
+            PrepareSelectByNameCommand();
             PrepareSelectAllCommand();
         }
 
@@ -155,91 +156,79 @@ namespace cononia.src.model
             
         }
 
-        //    public OrderInfo SelectOrderInfoById(long ID)
-        //    {
-        //        OrderInfo info = RetrieveData(ID);
-        //        if (info != null)
-        //            return info;
+        public OrderInfo SelectOrderInfoById(long ID)
+        {
+            OrderInfo info = new OrderInfo();
+            try
+            {
+                _dbManager.Connection.Open();
+                _selectByIdCommand.Parameters["@ID"].Value = ID;
+                SQLiteDataReader reader = _selectByIdCommand.ExecuteReader();
+                if (reader.Read())
+                {
+                    MakeOrderInfo(reader, out info);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.StackTrace);
+            }
+            finally
+            {
+                _dbManager.Connection.Close();
+            }
 
-        //        try
-        //        {
-        //            _dbManager.Connection.Open();
-        //            SelectByIdCommand.Parameters["@ID"].Value = ID;
-        //            SQLiteDataReader reader =  SelectByIdCommand.ExecuteReader();
-        //            if(reader.Read())
-        //            {
-        //                MakeOrderInfo(reader, out info);
-        //                CacheData(info.Id, info);
-        //            }
-        //        }
-        //        catch(Exception e)
-        //        {
-        //            Debug.WriteLine(e.StackTrace);
-        //        }
-        //        finally
-        //        {
-        //            _dbManager.Connection.Close();
-        //        }
-
-        //        return info;
-        //    }
+            return info;
+        }
 
         public OrderInfo SelectOrderInfoByName(string Name)
         {
             OrderInfo info = new OrderInfo();
-            //OrderInfo info = RetrieveData(Name);
-            //if (info != null)
-            //    return info;
 
-            //try
-            //{
-            //    _dbManager.Connection.Open();
-            //    SelectByIdCommand.Parameters["@Name"].Value = Name;
-            //    SQLiteDataReader reader = SelectByIdCommand.ExecuteReader();
-            //    if (reader.Read())
-            //    {
-            //        MakeOrderInfo(reader, out info);
-            //        CacheData(info.Id, info);
-            //    }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.StackTrace);
-            //}
-            //finally
-            //{
-            //    _dbManager.Connection.Close();
-            //}
+            try
+            {
+                _dbManager.Connection.Open();
+                _selectByIdCommand.Parameters["@Name"].Value = Name;
+                SQLiteDataReader reader = _selectByIdCommand.ExecuteReader();
+                if (reader.Read())
+                {
+                    MakeOrderInfo(reader, out info);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.StackTrace);
+            }
+            finally
+            {
+                _dbManager.Connection.Close();
+            }
 
             return info;
         }
 
         public void GetAll(out List<OrderInfo> orderInfoList)
         {
-            if (!_bExcutedSelectAllCommand)
+            _orderInfos = new List<OrderInfo>();
+            try
             {
-                _bExcutedSelectAllCommand = true;
-                _orderInfos = new List<OrderInfo>();
-                try
-                {
-                    _dbManager.Connection.Open();
-                    SQLiteDataReader reader = SelectAllCommand.ExecuteReader();
+                _dbManager.Connection.Open();
+                SQLiteDataReader reader = _selectAllCommand.ExecuteReader();
 
-                    OrderInfo info;
-                    while (reader.Read())
-                    {
-                        MakeOrderInfo(reader, out info);
-                        _orderInfos.Add(info);
-                    }
-                }
-                catch (Exception e)
+                OrderInfo info;
+                while (reader.Read())
                 {
-                    Debug.WriteLine(e.StackTrace);
+                    MakeOrderInfo(reader, out info);
+                    _orderInfos.Add(info);
                 }
-                finally
-                {
-                    _dbManager.Connection.Close();
-                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.StackTrace);
+            }
+            finally
+            {
+                _dbManager.Connection.Close();
             }
 
             orderInfoList = _orderInfos;

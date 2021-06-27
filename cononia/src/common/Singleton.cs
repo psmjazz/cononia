@@ -21,7 +21,11 @@ namespace cononia.src.common
                 {
                     _instance = new T();
                 }
-                _instance.Initialize();
+                if(!_instance.Initialized)
+                {
+                    _instance.Initialize();
+                }
+                
                 return _instance;
             }
         }
