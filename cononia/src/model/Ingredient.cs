@@ -210,7 +210,10 @@ namespace cononia.src.model
             Debug.WriteLine("all ingredients : " + count);
             RxMessage itemListMessage = new RxMessage();
             itemListMessage.Content = _ingredients;
-            RxCore.Instance.Publish(EUpdateEvent.UpdateIngredientList, itemListMessage);
+            if(message.Callback != null)
+            {
+                message.Callback.Invoke(itemListMessage);
+            }
             //RxItemListMessage itemListMessage = new RxItemListMessage();
             //itemListMessage.ItemList = _ingredients;
 

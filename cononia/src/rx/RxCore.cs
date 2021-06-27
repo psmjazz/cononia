@@ -44,10 +44,9 @@ namespace cononia.src.rx
                 _rxNodeDic[eventName] = new RxNode();
                 _rxNodeDic[eventName].RegisterEventListener(listener);
             }
-            
         }
 
-        public void Publish(Enum eventName, RxMessage message)
+        public void SendMessage(Enum eventName, RxMessage message)
         {
             if(_rxNodeDic.ContainsKey(eventName))
             {

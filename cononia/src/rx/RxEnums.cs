@@ -4,10 +4,6 @@ using System.Text;
 
 namespace cononia.src.rx
 {
-    public enum EUpdateEvent
-    {
-        UpdateIngredientList
-    }
 
     enum ERxEventType
     {

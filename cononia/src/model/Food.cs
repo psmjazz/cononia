@@ -1,4 +1,5 @@
 ﻿using cononia.src.common;
+using cononia.src.rx;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -34,24 +35,38 @@ namespace cononia.src.model
         }
     }
 
+    public enum RxFoodCommand
+    {
+        GetAllFoods,
+        GetFoodById,
+        GetFoodByName,
+        RegisterFood
+    }
     class FoodManager : Singleton<FoodManager>
     {
-        public void GetAll(out List<Food> foods)
+        public override void Initialize()
         {
-            foods = new List<Food>();
+            base.Initialize();
+
+            RxCore.Instance.RegisterListener(RxFoodCommand.GetAllFoods, OnGetAll);
+            RxCore.Instance.RegisterListener(RxFoodCommand.GetFoodById, OnGetFoodById);
+        }
+        private void OnGetAll(RxMessage message)
+        {
+            
         }
 
-        public Food GetFoodById(long id)
+        private void OnGetFoodById(RxMessage message)
         {
-            return new Food();
+            
         }
 
-        public Food GetFoodByName(string name)
+        private void OnGetFoodByName(RxMessage message)
         {
-            return new Food();
+            
         }
 
-        public void RegisterFood(Food food)
+        private void OnRegisterFood(RxMessage message)
         {
 
         }

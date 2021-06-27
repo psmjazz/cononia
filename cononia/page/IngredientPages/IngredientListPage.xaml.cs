@@ -30,9 +30,9 @@ namespace cononia.page.IngredientPages
             Debug.WriteLine("ingredientList Page ctor");
             InitializeComponent();
 
-            RxCore.Instance.RegisterListener(EUpdateEvent.UpdateIngredientList, OnIngredientInfoUpdated);
-
-            RxCore.Instance.Publish(RxIngredientCommand.GetAllIngredients, new RxMessage());
+            RxMessage getAllMessage = new RxMessage();
+            getAllMessage.Callback = OnIngredientInfoUpdated;
+            RxCore.Instance.SendMessage(RxIngredientCommand.GetAllIngredients, getAllMessage);
         }
 
         ~IngredientListPage()
@@ -61,7 +61,7 @@ namespace cononia.page.IngredientPages
 
         private void ItemList_Refresh_Click(object sender, RoutedEventArgs e)
         {
-            RxCore.Instance.Publish(RxIngredientCommand.GetAllIngredients, new RxMessage());
+            RxCore.Instance.SendMessage(RxIngredientCommand.GetAllIngredients, new RxMessage());
         }
 
     }

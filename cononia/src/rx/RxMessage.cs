@@ -8,11 +8,7 @@ namespace cononia.src.rx
     public class RxMessage
     {
         public object Content { get; set; }
-        public string Message { get; set; }
+        public Action<RxMessage> Callback { get; set; }
 
-        public override string ToString()
-        {
-            return "base : " + Message;
-        }
     }
 }
